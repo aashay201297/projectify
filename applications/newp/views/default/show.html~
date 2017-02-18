@@ -1,0 +1,62 @@
+{{extend 'layout.html'}}
+<script>
+function like(type) {
+$.get("{{=URL('like_image.json', args=request.args)}}/" + type, function
+(data) {
+$("#like1").html(data.like1);
+$("#like2").html(data.like2);
+$("#like3").html(data.like3);
+$("#like4").html(data.like4);
+$("#like5").html(data.like5);
+$("#totlik").html(data.totlik);
+});
+}
+</script>
+<script>
+function toexec() {
+  $.get('{{=URL("like_count.json", args=request.args)}}', function (data) {
+    console.log(data)
+    console.log(data.like1)
+  })
+}
+
+toexec()
+</script>
+
+<br><br>
+<form><input type="hidden" id="id" name="id" value="" /></form>
+<center>
+{{for images in image:}}
+{{=images.title}}
+<br>
+<img width="200px"
+     src="{{=URL('download',args=images.image)}}"/>
+<h3>Description</h3>
+{{=images.description}}
+<p>By-
+{{=(A(images.author_id.first_name, _href=URL("showprofile",args=images.author_id.id)))}}</p>
+</center>
+<br><br>
+
+<p id="like1">{{=like1}}</p>
+<button onclick="like(1)">Like1</button>
+<p id="like2">{{=like2}}</p>
+<button onclick="like(2)">Like2</button>
+<p id="like3">{{=like3}}</p>
+<button onclick="like(3)">Like3</button>
+<p id="like4">{{=like4}}</p>
+<button onclick="like(4)">Like4</button>
+<p id="like5">{{=like5}}</p>
+<button onclick="like(5)">Like5</button>
+
+<p id="totlik">{{=totlik}}</p>
+
+
+{{for comment in comments:}}
+{{=(A(comment.author_id.first_name, _href=URL("showprofile",args=comment.author_id.id)))}}
+<br>
+{{=comment.body}}
+<br>
+{{pass}}
+{{=form}}
+{{pass}}

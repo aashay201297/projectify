@@ -1,0 +1,625 @@
+timestamp: 2016-03-21T18:35:47.688405
+CREATE TABLE auth_user(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name CHAR(128),
+    last_name CHAR(128),
+    email CHAR(512),
+    password CHAR(512),
+    registration_key CHAR(512),
+    reset_password_key CHAR(512),
+    registration_id CHAR(512)
+);
+success!
+timestamp: 2016-03-21T18:35:47.846365
+CREATE TABLE auth_group(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2016-03-21T18:35:47.980921
+CREATE TABLE auth_membership(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE  
+);
+success!
+timestamp: 2016-03-21T18:35:48.103949
+CREATE TABLE auth_permission(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE  ,
+    name CHAR(512),
+    table_name CHAR(512),
+    record_id INTEGER
+);
+success!
+timestamp: 2016-03-21T18:35:48.227719
+CREATE TABLE auth_event(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_stamp TIMESTAMP,
+    client_ip CHAR(512),
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    origin CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2016-03-21T18:35:48.353075
+CREATE TABLE auth_cas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    created_on TIMESTAMP,
+    service CHAR(512),
+    ticket CHAR(512),
+    renew CHAR(1)
+);
+success!
+timestamp: 2016-04-19T20:57:29.182491
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T20:57:53.972762
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T20:58:13.758514
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T20:59:13.817350
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:00:13.824815
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:00:43.176179
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:00:44.342762
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:00:52.870678
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:02:52.378987
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:19:12.153674
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:20:09.074820
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:20:12.195451
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:20:27.110058
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:20:46.281002
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:20:58.171268
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:21:12.171385
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:24:33.938836
+ALTER TABLE auth_user ADD username CHAR(128) UNIQUE;
+timestamp: 2016-04-19T21:25:04.948461
+ALTER TABLE auth_user ADD username CHAR(128);
+timestamp: 2016-04-19T21:25:05.045515
+ALTER TABLE auth_user ADD phone CHAR(512);
+timestamp: 2016-04-19T21:25:05.146729
+ALTER TABLE auth_user ADD profile_picture CHAR(512);
+success!
+timestamp: 2016-04-19T21:25:05.261425
+CREATE TABLE tag(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tagname CHAR(255) UNIQUE,
+    imlist TEXT
+);
+success!
+timestamp: 2016-04-19T21:25:05.365652
+CREATE TABLE image(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title CHAR(255) UNIQUE,
+    author_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    upload_date CHAR(512),
+    description TEXT,
+    image CHAR(512),
+    like1 INTEGER,
+    like2 INTEGER,
+    like3 INTEGER,
+    like4 INTEGER,
+    like5 INTEGER,
+    total INTEGER
+);
+success!
+timestamp: 2016-04-19T21:25:05.485458
+CREATE TABLE post(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    image_id INTEGER REFERENCES image (id) ON DELETE CASCADE  ,
+    author_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    body TEXT
+);
+success!
+timestamp: 2016-04-19T21:25:05.618574
+CREATE TABLE likes(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imageid INTEGER REFERENCES image (id) ON DELETE CASCADE  ,
+    score INTEGER,
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  
+);
+success!
+success!
+timestamp: 2016-04-21T04:30:07.255101
+ALTER TABLE image ADD taglist TEXT;
+success!
+timestamp: 2016-04-21T04:30:07.439017
+CREATE TABLE tags(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imageid INTEGER REFERENCES image (id) ON DELETE CASCADE  ,
+    name TEXT,
+    imglist TEXT,
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  
+);
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!

@@ -1,0 +1,69 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+h3{
+	text-align:center;
+color:red;
+}
+p{
+	font-size:1.3em;
+}
+.image{
+	text-align:center;
+}
+#recent,#most,#rated{
+margin:20px 140px;
+display :inline-block;
+}
+</style>
+</head>
+<body>
+<div class="image">
+<img align="center" width=60% src="/projectify/static/images/home.jpg"/>
+</div>
+<h3> Welcome to a user-friendly project sharing website <b>Projectify</b>. </h3>
+<br>
+<p> You can {{=A('upload',_href=URL('upload'))}} your {{=A('projects',_href=URL('projects'))}} (as a developer) or either only view or rate projects (as a viewer) already at this portal. </p>
+<div class="home">
+<div id="recent">
+<h2> Recently downloaded  </h2>
+<ol>
+{{count=0}}
+{{for i in rows1:}}
+{{count=count+1;}}
+<li> {{=A(i.project_id,_href=URL('show',args=i.id))}} {{="downloaded by"}} {{=A(i.author,_href=URL('allprofile',args=i.author))}}</li>
+{{if count==5:}}
+{{break}}
+{{pass}}
+{{pass}}
+</ol>
+</div>
+<div id="most">
+<h2> Most downloaded  </h2>
+<ol>
+{{count=0}}
+{{for i in rows2:}}
+{{count=count+1;}}
+<li> {{=A(i.project_title,_href=URL('show',args=i.id))}} is downloaded {{=i.downloads}} times</li>
+{{if count==5:}}
+{{break}}
+{{pass}}
+{{pass}}
+</ol>
+</div>
+<div id="rated">
+<h2>Highly Rated</h2>
+<ol>
+{{count=0}}
+{{for i in rows:}}
+{{count=count+1;}}
+<li> {{=A(i.project_title,_href=URL('show',args=i.id))}} has a {{=i.rating}} out of 5 rating</li>
+{{if count==5:}}
+{{break}}
+{{pass}}
+{{pass}}
+</ol>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{{extend 'layout.html'}}
+{{for file in s:}}
+<a href="{{=URL('download_a',args=file.id)}}"> Click here to Download </a> {{='project developed by'}} <a href="{{=URL('profile',args=file.id)}}"> {{=file.author_name}} </a> {{='titled'}} : {{=file.project_title}}
+<br>
+{{pass}}

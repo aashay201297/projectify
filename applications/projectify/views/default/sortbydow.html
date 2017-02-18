@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+<h2> Most downloaded  </h2>
+<br>
+<ol>
+{{for i in rows1:}}
+<li> {{=A(i.project_title,_href=URL('show',args=i.id))}} is downloaded {{=i.downloads}} times</li>
+<br>
+{{pass}}
+{{pass}}
+</ol>
+

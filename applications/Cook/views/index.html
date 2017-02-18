@@ -1,0 +1,28 @@
+{{extend 'layout.html'}}
+<table>
+<tr>
+<th>Name</th>
+<th>Image</th>
+<th>description</th>
+</tr>
+{{for i,row in enumerate(rows):}}
+{{if i==items_per_page: break}}
+<tr>
+<td style="padding:10px">{{=(A(row.name_of_recipe, _href=URL("show", args=row.id)))}}</td>
+<td style="padding: 10px"><img height="150px" width= "200px" src="{{=URL('download',args=rows[i].image)}}"/></td>
+<td>{{=row.name_of_recipe}}</td>
+</tr>
+{{pass}}
+</table>
+
+{{if page:}}
+<a href="{{=URL(args=[page-1])}}">previous</a>
+{{else:}}
+<p style="display: inline-block">previous</p>
+{{pass}}
+
+{{if len(rows) > items_per_page:}}
+<a href="{{=URL(args=[page+1])}}">next</a>
+{{else:}}
+<p style="display: inline-block">next</p>
+{{pass}}

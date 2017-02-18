@@ -1,0 +1,13 @@
+{{extend 'layout.html'}}
+{{=form}}
+{{if len(ans):}}
+<p>{{=A(row.project_title,_href=URL('show',args=row.id))}}
+{{='this project is developed by'}} {{=row.author_name}}
+</p>
+{{else:}}
+{{='No results'}}
+{{="aojfiajf"}}
+{{pass}}
+
+
+

@@ -1,0 +1,40 @@
+{{extend 'layout.html'}}
+<head>
+	<style>
+		.blocking{
+			display:inline-block;
+		}
+#data{
+width:40%;
+}
+		#image{
+			margin-left:100px;
+		}	
+	</style>	
+</head>
+<h1> Dish Title: <i><b> {{=rec.Dish}} </b></i></h1>
+<h2>
+<div class="blocking" id="data">
+<ul>Other info about the recipe
+<li style="padding:10px">
+Upload time: {{=rec.Time_of_upload}}</li>
+<li style="padding:10px">
+Ingredients used: {{=rec.Ingredients}}</li>
+<li style="padding:10px">
+Genre of dish: {{=rec.Dish_type}}</li>
+{{pass}}
+<li style="padding:10px">
+Procedure: {{=rec.Process}}</li>
+</ul>
+</div>
+<div class="blocking" id="image" >
+Demo Image:
+		<img width="500px"
+		     src="{{=URL('download', args=rec.image)}}"/>
+</div>
+</h2>
+<p>{{=form}}</p>
+<p>No. of likes: {{=votes-1}}</p>
+{{=(A('edit',_href=URL('edit',args=rec.id)))}}
+
+

@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+<h2> Recently Added  </h2>
+<br>
+<ol>
+{{for i in rows1:}}
+<li> {{=A(i.project_title,_href=URL('show',args=i.id))}} was uploaded on {{=i.time_of_upload}}</li>
+<br>
+{{pass}}
+{{pass}}
+</ol>
+

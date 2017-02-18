@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+<h2> Most Rated </h2>
+<br>
+<ol>
+{{for i in rows1:}}
+<li> {{=A(i.project_title,_href=URL('show',args=i.id))}} has a {{=i.rating}} out of 5 rating</li>
+<br>
+{{pass}}
+{{pass}}
+</ol>
+

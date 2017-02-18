@@ -1,0 +1,14 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+h2{
+width:100%;
+}
+
+</style>
+</head>
+{{if x==0:}}
+{{=form}}
+{{else:}}
+<h2>You have already rated this project! :)</h2>
+{{pass}}

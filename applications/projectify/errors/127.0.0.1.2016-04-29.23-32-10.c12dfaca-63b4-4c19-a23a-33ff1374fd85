@@ -1,0 +1,562 @@
+(dp1
+S'output'
+p2
+S"<type 'exceptions.SyntaxError'> Field: unknown field type: box for post"
+p3
+sS'layer'
+p4
+S'/home/aman/web2py_mint/applications/projectify/models/db.py'
+p5
+sS'code'
+p6
+S'# -*- coding: utf-8 -*-\n\n#########################################################################\n## This scaffolding model makes your app work on Google App Engine too\n## File is released under public domain and you can use without limitations\n#########################################################################\n\n## if SSL/HTTPS is properly configured and you want all HTTP requests to\n## be redirected to HTTPS, uncomment the line below:\n# request.requires_https()\n\n## app configuration made easy. Look inside private/appconfig.ini\nfrom gluon.contrib.appconfig import AppConfig\n## once in production, remove reload=True to gain full speed\nmyconf = AppConfig(reload=True)\n\n\nif not request.env.web2py_runtime_gae:\n## if NOT running on Google App Engine use SQLite or other DB\n\tdb = DAL(myconf.take(\'db.uri\'), pool_size=myconf.take(\'db.pool_size\', cast=int), check_reserved=[\'all\'])\nelse:\n## connect to Google BigTable (optional \'google:datastore://namespace\')\n\tdb = DAL(\'google:datastore+ndb\')\n## store sessions and tickets there\n\tsession.connect(request, response, db=db)\n## or store session in Memcache, Redis, etc.\n## from gluon.contrib.memdb import MEMDB\n## from google.appengine.api.memcache import Client\n## session.connect(request, response, db = MEMDB(Client()))\n\n## by default give a view/generic.extension to all actions from localhost\n## none otherwise. a pattern can be \'controller/function.extension\'\n\tresponse.generic_patterns = [\'*\'] if request.is_local else []\n## choose a style for forms\n\tresponse.formstyle = myconf.take(\'forms.formstyle\')  # or \'bootstrap3_stacked\' or \'bootstrap2\' or other\n\tresponse.form_label_separator = myconf.take(\'forms.separator\')\n\n\n## (optional) optimize handling of static files\n# response.optimize_css = \'concat,minify,inline\'\n# response.optimize_js = \'concat,minify,inline\'\n## (optional) static assets folder versioning\n# response.static_version = \'0.0.0\'\n#########################################################################\n## Here is sample code if you need for\n## - email capabilities\n## - authentication (registration, login, logout, ... )\n## - authorization (role based authorization)\n## - services (xml, csv, json, xmlrpc, jsonrpc, amf, rss)\n## - old style crud actions\n## (more options discussed in gluon/tools.py)\n#########################################################################\n\nfrom gluon.tools import Auth, Service, PluginManager\n\nauth = Auth(db)\nservice = Service()\nplugins = PluginManager()\ndb.define_table(auth.settings.table_user_name,\n\t\tField(\'first_name\', length=128, default=\'\'),\n\t\tField(\'last_name\', length=128, default=\'\'),\n\t\tField(\'email\', length=128, default=\'\', unique=True), # required\n\t\tField(\'password\', \'password\', length=512,            # required\n\t\t\treadable=False, label=\'Password\'),\n\t\tField(\'phone\'),\n\t\tField(\'profession\',requires=IS_IN_SET([\'Student(Undergrad)\',\'Professor\',\'MS\',\'PHD\',\'others\'])),\n\t\tField(\'user_type\',requires=IS_IN_SET([\'Developer\',\'Viewer\'])),\n\t\tField(\'registration_key\', length=512,                # required\n\t\t\twritable=False, readable=False, default=\'\'),\n\t\tField(\'reset_password_key\', length=512,              # required\n\t\t\twritable=False, readable=False, default=\'\'),\n\t\tField(\'registration_id\', length=512,                 # required\n\t\t\twritable=False, readable=False, default=\'\'))\n## do not forget validators\ncustom_auth_table = db[auth.settings.table_user_name] # get the custom_auth_table\ncustom_auth_table.first_name.requires =   IS_NOT_EMPTY(error_message=auth.messages.is_empty)\ncustom_auth_table.last_name.requires =   IS_NOT_EMPTY(error_message=auth.messages.is_empty)\ncustom_auth_table.password.requires = [IS_STRONG(), CRYPT()]\ncustom_auth_table.email.requires = [\n\tIS_EMAIL(error_message=auth.messages.invalid_email),\n\tIS_NOT_IN_DB(db, custom_auth_table.email)]\nauth.settings.table_user = custom_auth_table # tell auth to use custom_auth_table\n## create all tables needed by auth if not custom tables\nauth.define_tables(username=False, signature=False)\n## configure email\nmail = auth.settings.mailer\nmail.settings.server = \'logging\' if request.is_local else myconf.take(\'smtp.server\')\nmail.settings.sender = myconf.take(\'smtp.sender\')\nmail.settings.login = myconf.take(\'smtp.login\')\n## configure auth policy\nauth.settings.registration_requires_verification = False\nauth.settings.registration_requires_approval = False\nauth.settings.reset_password_requires_verification = True\n#########################################################################\n## Define your tables below (or better in another model file) for example\n##\n## >>> db.define_table(\'mytable\',Field(\'myfield\',\'string\'))\n##\n## Fields can be \'string\',\'text\',\'password\',\'integer\',\'double\',\'boolean\'\n##       \'date\',\'time\',\'datetime\',\'blob\',\'upload\', \'reference TABLENAME\'\n## There is an implicit \'id integer autoincrement\' field\n## Consult manual for more options, validators, etc.\n##\n## More API examples for controllers:\n##\n## >>> db.mytable.insert(myfield=\'value\')\n## >>> rows=db(db.mytable.myfield==\'value\').select(db.mytable.ALL)\n## >>> for row in rows: print row.id, row.myfield\n#########################################################################\n\n## after defining tables, uncomment below to enable auditing\n# auth.enable_record_versioning(dbdb.define_table(\'project\',\ndb.define_table(\'project\',\n\t\tField(\'project_title\',type=\'string\'),\n\t\tField(\'time_of_upload\',\'string\',readable=False,writable=False),\n\t\tField(\'folder\',\'upload\',autodelete=True),\n\t\tField(\'author_name\'),\n\t\tField(\'project_manual\',type=\'upload\'),\n\t\tField(\'description\',type=\'text\'),\n\t\tField(\'likes\',\'string\',default=\'\',readable=False,writable=False),\n\t\tField(\'category\'),\n\t\tField(\'type_of_project\'),\n                Field(\'downloads\',\'integer\',default=0,readable=False,writable=False),\n\t\t\tformat = \'%(project_title)s\')\ndb.define_table(\'post1\',\n\t\tField(\'project_id\',\'reference project\'),\n\t\tField(\'author\'),\n\t\tField(\'post\',\'box\'))\ndb.define_table(\'cat\',\n\t\tField(\'category\'),\n\t\tformat=\'%(category)s\')\t\ndb.define_table(\'subcat\',\n\t\tField(\'category\',db.cat),\n\t\tField(\'sub_category\'),\n\t\t\tformat=\t\'%(sub_category)s\')\t\ndb.define_table(\'d\',\n\t\tField(\'project_id\'),\n                Field(\'time_stamp\'),\n                Field(\'author\'))\t\nif db(db.cat.id>0).count() == 0:\n\tdb.cat.truncate()\n\tdb.subcat.truncate()\n\tdb.cat.insert(category=\'Texas\')\n\tdb.cat.insert(category=\'Illinois\')\n\tdb.cat.insert(category=\'California\')\n\tdb.subcat.insert(sub_category=\'Austin\',category=1)\n\tdb.subcat.insert(sub_category=\'Dallas\',category=1)\n\tdb.subcat.insert(sub_category=\'Chicago\',category=2)\n\tdb.subcat.insert(sub_category=\'Aurora\',category=2)\n\tdb.subcat.insert(sub_category=\'Los Angeles\',category=3)\n\tdb.subcat.insert(sub_category=\'San Diego\',category=3)\t \ndb.define_table(\'conti\',\n                Field(\'contributor\',\'reference auth_user\'),\n                Field(\'project_id\'))\n\n#db.define_table(\'post\',\n#\t\tField(\'project_id\',\'reference project\'),\n#\t\tField(\'author\'),\n#\t\tField(\'body\',\'text\'))\ndb.conti.contributor.requires=IS_IN_DB(db,db.auth_user,\'%(first_name)s\')\ndb.post1.project_id.requires = IS_IN_DB(db, db.project.id, \'%(project_title)s\')\ndb.post1.author.requires = IS_NOT_EMPTY()\ndb.post1.project_id.writable = db.post1.project_id.readable = False\ndb.project.category.writable = db.project.category.readable = False\n#db.project.folder.requires = IS_NOT_EMPTY()\ndb.project.project_title.requires = IS_NOT_EMPTY()\ndb.project.description.requires = IS_NOT_EMPTY()\n#db.project.project_manual.requires = IS_NOT_EMPTY()\ndb.post1.author.requires = IS_NOT_EMPTY()\ndb.project.type_of_project.requires=IS_IN_SET([\'private\',\'psuedo-private\',\'public\'])\n\n\n\n"""class CascadingSelect(object):\n\tdef __init__(self, *tables):\n\t\tself.tables = tables \n\t\tself.prompt = lambda table:str(table)   \n\tdef widget(self,f,v):\n\t\timport uuid\n\t\tuid = str(uuid.uuid4())[:8]\n\td_id = "cascade-" + uid\n\twrapper = TABLE(_id=d_id)\n\tparent = None; parent_format = None; \n\tfn =  \'\' \n\tvr = \'var dd%s = [];var oi%s = [];\\n\' % (uid,uid)\n\tprompt = [self.prompt(table) for table in self.tables]\n\tvr += \'var pr%s = ["\' % uid + \'","\'.join([str(p) for p in prompt]) + \'"];\\n\' \n\tf_inp = SQLFORM.widgets.string.widget(f,v)\n\tf_id = f_inp[\'_id\']\n\tf_inp[\'_type\'] = "hidden"\n        for tc, table in enumerate(self.tables):             \n\t\tdb = table._db     \n\t\tformat = table._format            \n\t\toptions = db(table[\'id\']>0).select()\n\t\tid = str(table) + \'_\' + format[2:-2]             \n\t\topts = [OPTION(format % opt,_value=opt.id,\n\t\t\t\t_parent=opt[str(parent)] if parent else \'0\') \\\n\t\t\t\tfor opt in options]\n\topts.insert(0, OPTION(prompt[tc],_value=0))\n\tinp = SELECT(opts ,_parent=str(parent) + \\\n\t\t\t "_" + str(parent_format),\n\t\t\t _id=id,_name=id,\n\t\t\t _disabled="disabled" if parent else None)\n\twrapper.append(TR(inp))\n\tnext = str(tc + 1)\n\tvr += \'var p%s = jQuery("#%s #%s"); dd%s.push(p%s);\\n\' % (tc,d_id,id,uid,tc)            \n\tvr += \'var i%s = jQuery("option",p%s).clone(); oi%s.push(i%s);\\n\' % (tc,tc,uid,tc)\n\tfn_in = \'for (i=%s;i<%s;i+=1){dd%s[i].find("option").remove();\'\\\n\t\t\'dd%s[i].append(\\\'<option value="0">\\\' + pr%s[i] + \\\'</option>\\\');\'\\\n\t\t\'dd%s[i].attr("disabled","disabled");}\\n\' % \\\n\t\t\t (next,len(self.tables),uid,uid,uid,uid)\n\tfn_in +=\'oi%s[%s].each(function(i){\'\n\t\'if (jQuery(this).attr("parent") == dd%s[%s].val()){\'\\\n\t\t\'dd%s[%s].append(this);}});\' % (uid,next,uid,tc,uid,next)            \n\tfn_in += \'dd%s[%s].removeAttr("disabled");\\n\' % (uid,next)\n\tfn_in += \'jQuery("#%s").val("");\' % f_id\n\tif (tc < len(self.tables)-1):\t\t\n\t\tfn += \'dd%s[%s].change(function(){%s});\\n\' % (uid,tc,fn_in) \n\telse:\n\t\tfn_in = \'jQuery("#%s").val(jQuery(this).val());\' % f_id\n\t\tfn += \'dd%s[%s].change(function(){%s});\\n\' % (uid,tc,fn_in)\n\t\tif v:\n\t\t\t fn += \'dd%s[%s].val(%s);\' % (uid,tc,v)                       \n\tparent = table\n\tparent_format = format[2:-2]\n\n\twrapper.append(f_inp)\n\twrapper.append(SCRIPT(vr,fn))\n\treturn wrapper"""\n'
+p7
+sS'snapshot'
+p8
+(dp9
+S'exception'
+p10
+(dp11
+S'__getslice__'
+p12
+S"<method-wrapper '__getslice__' of exceptions.SyntaxError object>"
+p13
+sS'text'
+p14
+S'None'
+p15
+sS'__str__'
+p16
+S"<method-wrapper '__str__' of exceptions.SyntaxError object>"
+p17
+sS'__reduce__'
+p18
+S'<built-in method __reduce__ of exceptions.SyntaxError object>'
+p19
+sS'__dict__'
+p20
+S'{}'
+p21
+sS'__sizeof__'
+p22
+S'<built-in method __sizeof__ of exceptions.SyntaxError object>'
+p23
+sS'__init__'
+p24
+S"<method-wrapper '__init__' of exceptions.SyntaxError object>"
+p25
+sS'__setattr__'
+p26
+S"<method-wrapper '__setattr__' of exceptions.SyntaxError object>"
+p27
+sS'__reduce_ex__'
+p28
+S'<built-in method __reduce_ex__ of exceptions.SyntaxError object>'
+p29
+sS'__new__'
+p30
+S'<built-in method __new__ of type object>'
+p31
+sS'__format__'
+p32
+S'<built-in method __format__ of exceptions.SyntaxError object>'
+p33
+sS'__class__'
+p34
+S"<type 'exceptions.SyntaxError'>"
+p35
+sS'filename'
+p36
+S'None'
+p37
+sS'lineno'
+p38
+S'None'
+p39
+sS'msg'
+p40
+S"'Field: unknown field type: box for post'"
+p41
+sS'__doc__'
+p42
+S"'Invalid syntax.'"
+p43
+sS'__getitem__'
+p44
+S"<method-wrapper '__getitem__' of exceptions.SyntaxError object>"
+p45
+sS'__setstate__'
+p46
+S'<built-in method __setstate__ of exceptions.SyntaxError object>'
+p47
+sS'__getattribute__'
+p48
+S"<method-wrapper '__getattribute__' of exceptions.SyntaxError object>"
+p49
+sS'print_file_and_line'
+p50
+S'None'
+p51
+sS'args'
+p52
+S"('Field: unknown field type: box for post',)"
+p53
+sS'__subclasshook__'
+p54
+S'<built-in method __subclasshook__ of type object>'
+p55
+sS'offset'
+p56
+S'None'
+p57
+sS'__unicode__'
+p58
+S'<built-in method __unicode__ of exceptions.SyntaxError object>'
+p59
+sS'__delattr__'
+p60
+S"<method-wrapper '__delattr__' of exceptions.SyntaxError object>"
+p61
+sS'__repr__'
+p62
+S"<method-wrapper '__repr__' of exceptions.SyntaxError object>"
+p63
+sS'__hash__'
+p64
+S"<method-wrapper '__hash__' of exceptions.SyntaxError object>"
+p65
+ssS'evalue'
+p66
+S'Field: unknown field type: box for post'
+p67
+sS'request'
+p68
+cgluon.html
+XML_unpickle
+p69
+(S's\xbe`\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">ajax</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">application</td><td style="vertical-align:top;">:</td><td><div>projectify</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">args</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>40</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cid</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">client</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">controller</td><td style="vertical-align:top;">:</td><td><div>default</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_admin</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-b5e5d7cb-b148-430e-810b-b60cbf5c473a<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_newp</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-5a68d07c-94cc-4e15-b9e6-ccfe1b86a31c<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_projectify</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_welcome</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-2b0bc577-cfeb-4d23-ba31-3f02e8ec46d9<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">env</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_ENCODING</td><td style="vertical-align:top;">:</td><td><div>gzip, deflate</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_LANGUAGE</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.5</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_CACHE_CONTROL</td><td style="vertical-align:top;">:</td><td><div>max-age=0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_CONNECTION</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_COOKIE</td><td style="vertical-align:top;">:</td><td><div>session_id_welcome=127.0.0.1-2b0bc577-cfeb-4d23-ba31-3f02e8ec46d9; session_id_admin=127.0.0.1-b5e5d7cb-b148-430e-810b-b60cbf5c473a; session_id_projectify=127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6; session_id_newp=127.0.0.1-5a68d07c-94cc-4e15-b9e6-ccfe1b86a31c</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_HOST</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1:8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_REFERER</td><td style="vertical-align:top;">:</td><td><div>http://127.0.0.1:8000/projectify/default/projects</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_USER_AGENT</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">PATH_INFO</td><td style="vertical-align:top;">:</td><td><div>/projectify/default/show/40</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">QUERY_STRING</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_ADDR</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_PORT</td><td style="vertical-align:top;">:</td><td><div>43996</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REQUEST_METHOD</td><td style="vertical-align:top;">:</td><td><div>GET</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SCRIPT_NAME</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_NAME</td><td style="vertical-align:top;">:</td><td><div>TheBeast</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PORT</td><td style="vertical-align:top;">:</td><td><div>8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PROTOCOL</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_SOFTWARE</td><td style="vertical-align:top;">:</td><td><div>Rocket 1.2.6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/aman/web2py_mint/applications/admin/&#x27;, &#x27;/home/aman/web2py_mint/applications/welcome/&#x27;, &#x27;/home/aman/web2py_mint/applications/newp/&#x27;, &#x27;/home/aman/web2py_mint/applications/projectify/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_args</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_options</td><td style="vertical-align:top;">:</td><td><div>&lt;Values at 0x7f4b08a745f0: {&#x27;verbose&#x27;: False, &#x27;ip&#x27;: &#x27;127.0.0.1&#x27;, &#x27;debuglevel&#x27;: 30, &#x27;with_scheduler&#x27;: False, &#x27;shutdown_timeout&#x27;: 5, &#x27;taskbar&#x27;: False, &#x27;with_coverage&#x27;: False, &#x27;pid_filename&#x27;: &#x27;httpserver.pid&#x27;, &#x27;maxthreads&#x27;: None, &#x27;softcron&#x27;: False, &#x27;server_name&#x27;: &#x27;TheBeast&#x27;, &#x27;bpython&#x27;: False, &#x27;nogui&#x27;: False, &#x27;port&#x27;: 8000, &#x27;print_errors&#x27;: False, &#x27;extcron&#x27;: False, &#x27;runcron&#x27;: False, &#x27;run_system_tests&#x27;: False, &#x27;test&#x27;: None, &#x27;folder&#x27;: &#x27;/home/aman/web2py_mint&#x27;, &#x27;config&#x27;: &#x27;&#x27;, &#x27;minthreads&#x27;: None, &#x27;shell&#x27;: None, &#x27;run&#x27;: &#x27;&#x27;, &#x27;log_filename&#x27;: &#x27;httpserver.log&#x27;, &#x27;profiler_dir&#x27;: None, &#x27;args&#x27;: [&#x27;&#x27;], &#x27;socket_timeout&#x27;: 5, &#x27;ssl_ca_certificate&#x27;: None, &#x27;scheduler&#x27;: None, &#x27;interfaces&#x27;: None, &#x27;ssl_private_key&#x27;: &#x27;&#x27;, &#x27;gae&#x27;: None, &#x27;password&#x27;: &#x27;******&#x27;, &#x27;request_queue_size&#x27;: 5, &#x27;ssl_certificate&#x27;: &#x27;&#x27;, &#x27;cronjob&#x27;: False, &#x27;numthreads&#x27;: None, &#x27;quiet&#x27;: False, &#x27;import_models&#x27;: False, &#x27;timeout&#x27;: 10, &#x27;plain&#x27;: False, &#x27;nobanner&#x27;: False}&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_encoding</td><td style="vertical-align:top;">:</td><td><div>gzip, deflate</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_language</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.5</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_cache_control</td><td style="vertical-align:top;">:</td><td><div>max-age=0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_connection</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_cookie</td><td style="vertical-align:top;">:</td><td><div>session_id_welcome=127.0.0.1-2b0bc577-cfeb-4d23-ba31-3f02e8ec46d9; session_id_admin=127.0.0.1-b5e5d7cb-b148-430e-810b-b60cbf5c473a; session_id_projectify=127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6; session_id_newp=127.0.0.1-5a68d07c-94cc-4e15-b9e6-ccfe1b86a31c</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_host</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1:8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_referer</td><td style="vertical-align:top;">:</td><td><div>http://127.0.0.1:8000/projectify/default/projects</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_user_agent</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>::1</div></td></tr><tr><td><div>127.0.1.1</div></td></tr><tr><td><div>TheBeast</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path_info</td><td style="vertical-align:top;">:</td><td><div>/projectify/default/show/40</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">query_string</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_addr</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_port</td><td style="vertical-align:top;">:</td><td><div>43996</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_method</td><td style="vertical-align:top;">:</td><td><div>GET</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_uri</td><td style="vertical-align:top;">:</td><td><div>/projectify/default/show/40</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">script_name</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_name</td><td style="vertical-align:top;">:</td><td><div>TheBeast</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_port</td><td style="vertical-align:top;">:</td><td><div>8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_protocol</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_software</td><td style="vertical-align:top;">:</td><td><div>Rocket 1.2.6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_path</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.14.3-stable+timestamp.2016.03.26.23.02.02</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.errors</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;&lt;stderr&gt;&#x27;, mode &#x27;w&#x27; at 0x7f4b0cf521e0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;class wsgiref.util.FileWrapper at 0x7f4b08ac5a10&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.input</td><td style="vertical-align:top;">:</td><td><div>&lt;socket._fileobject object at 0x7f4b042754d0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.url_scheme</td><td style="vertical-align:top;">:</td><td><div>http</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_errors</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;&lt;stderr&gt;&#x27;, mode &#x27;w&#x27; at 0x7f4b0cf521e0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;class wsgiref.util.FileWrapper at 0x7f4b08ac5a10&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_input</td><td style="vertical-align:top;">:</td><td><div>&lt;socket._fileobject object at 0x7f4b042754d0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_url_scheme</td><td style="vertical-align:top;">:</td><td><div>http</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">extension</td><td style="vertical-align:top;">:</td><td><div>html</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">folder</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint/applications/projectify/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">function</td><td style="vertical-align:top;">:</td><td><div>show</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">global_settings</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/aman/web2py_mint/applications/admin/&#x27;, &#x27;/home/aman/web2py_mint/applications/welcome/&#x27;, &#x27;/home/aman/web2py_mint/applications/newp/&#x27;, &#x27;/home/aman/web2py_mint/applications/projectify/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_args</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_options</td><td style="vertical-align:top;">:</td><td><div>&lt;Values at 0x7f4b08a745f0: {&#x27;verbose&#x27;: False, &#x27;ip&#x27;: &#x27;127.0.0.1&#x27;, &#x27;debuglevel&#x27;: 30, &#x27;with_scheduler&#x27;: False, &#x27;shutdown_timeout&#x27;: 5, &#x27;taskbar&#x27;: False, &#x27;with_coverage&#x27;: False, &#x27;pid_filename&#x27;: &#x27;httpserver.pid&#x27;, &#x27;maxthreads&#x27;: None, &#x27;softcron&#x27;: False, &#x27;server_name&#x27;: &#x27;TheBeast&#x27;, &#x27;bpython&#x27;: False, &#x27;nogui&#x27;: False, &#x27;port&#x27;: 8000, &#x27;print_errors&#x27;: False, &#x27;extcron&#x27;: False, &#x27;runcron&#x27;: False, &#x27;run_system_tests&#x27;: False, &#x27;test&#x27;: None, &#x27;folder&#x27;: &#x27;/home/aman/web2py_mint&#x27;, &#x27;config&#x27;: &#x27;&#x27;, &#x27;minthreads&#x27;: None, &#x27;shell&#x27;: None, &#x27;run&#x27;: &#x27;&#x27;, &#x27;log_filename&#x27;: &#x27;httpserver.log&#x27;, &#x27;profiler_dir&#x27;: None, &#x27;args&#x27;: [&#x27;&#x27;], &#x27;socket_timeout&#x27;: 5, &#x27;ssl_ca_certificate&#x27;: None, &#x27;scheduler&#x27;: None, &#x27;interfaces&#x27;: None, &#x27;ssl_private_key&#x27;: &#x27;&#x27;, &#x27;gae&#x27;: None, &#x27;password&#x27;: &#x27;******&#x27;, &#x27;request_queue_size&#x27;: 5, &#x27;ssl_certificate&#x27;: &#x27;&#x27;, &#x27;cronjob&#x27;: False, &#x27;numthreads&#x27;: None, &#x27;quiet&#x27;: False, &#x27;import_models&#x27;: False, &#x27;timeout&#x27;: 10, &#x27;plain&#x27;: False, &#x27;nobanner&#x27;: False}&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>::1</div></td></tr><tr><td><div>127.0.1.1</div></td></tr><tr><td><div>TheBeast</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.14.3-stable+timestamp.2016.03.26.23.02.02</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_https</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_local</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_restful</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_scheduler</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_shell</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">now</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 4, 29, 23, 32, 10, 65969)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_args</td><td style="vertical-align:top;">:</td><td><div>40</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_extension</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">url</td><td style="vertical-align:top;">:</td><td><div>/projectify/default/show/40</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">utcnow</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 4, 29, 18, 2, 10, 65984)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi</td><td style="vertical-align:top;">:</td><td><div>&lt;gluon.main.LazyWSGI object at 0x7f4b0421ad90&gt;</div></td></tr></table></div>'
+tRp70
+sS'frames'
+p71
+(lp72
+(dp73
+S'file'
+p74
+S'/home/aman/web2py_mint/gluon/restricted.py'
+p75
+sS'dump'
+p76
+(dp77
+S'environment'
+p78
+S"{'A': <class 'gluon.html.A'>, 'ANY_OF': <class 'gluon.validators.ANY_OF'>, 'ASSIGNJS': <function ASSIGNJS>, 'AppConfig': <function AppConfig>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'BUTTON': <class 'gluon.html.BUTTON'>, ...}"
+p79
+sS'ccode'
+p80
+S'<code object <module> at 0x7f4b042714b0, file "/...t/applications/projectify/models/db.py", line 13>'
+p81
+ssS'lnum'
+p82
+I227
+sS'lines'
+p83
+(dp84
+I224
+S'            ccode = code'
+p85
+sI225
+S'        else:'
+p86
+sI226
+S'            ccode = compile2(code, layer)'
+p87
+sI227
+S'        exec ccode in environment'
+p88
+sI228
+S'    except HTTP:'
+p89
+sI229
+S'        raise'
+p90
+sI230
+S'    except RestrictedError:'
+p91
+sI231
+S'        # do not encapsulate (obfuscate) the original RestrictedError'
+p92
+sI222
+S'    try:'
+p93
+sI223
+S'        if isinstance(code, types.CodeType):'
+p94
+ssS'call'
+p95
+S'(code=\'# -*- coding: utf-8 -*-\\n\\n#######################...wrapper.append(SCRIPT(vr,fn))\\n\\treturn wrapper"""\\n\', environment={\'A\': <class \'gluon.html.A\'>, \'ANY_OF\': <class \'gluon.validators.ANY_OF\'>, \'ASSIGNJS\': <function ASSIGNJS>, \'AppConfig\': <function AppConfig>, \'Auth\': <class \'gluon.tools.Auth\'>, \'B\': <class \'gluon.html.B\'>, \'BEAUTIFY\': <class \'gluon.html.BEAUTIFY\'>, \'BODY\': <class \'gluon.html.BODY\'>, \'BR\': <class \'gluon.html.BR\'>, \'BUTTON\': <class \'gluon.html.BUTTON\'>, ...}, layer=\'/home/aman/web2py_mint/applications/projectify/models/db.py\')'
+p96
+sS'func'
+p97
+S'restricted'
+p98
+sa(dp99
+g74
+S'/home/aman/web2py_mint/applications/projectify/models/db.py'
+p100
+sg76
+(dp101
+S'Field'
+p102
+S"<class 'pydal.objects.Field'>"
+p103
+ssg82
+I128
+sg83
+(dp104
+I128
+S"\t\tField('post','box'))"
+p105
+sI129
+S"db.define_table('cat',"
+p106
+sI130
+S"\t\tField('category'),"
+p107
+sI131
+S"\t\tformat='%(category)s')"
+p108
+sI132
+S"db.define_table('subcat',"
+p109
+sI123
+S"                Field('downloads','integer',default=0,readable=False,writable=False),"
+p110
+sI124
+S"\t\t\tformat = '%(project_title)s')"
+p111
+sI125
+S"db.define_table('post1',"
+p112
+sI126
+S"\t\tField('project_id','reference project'),"
+p113
+sI127
+S"\t\tField('author'),"
+p114
+ssg95
+S'()'
+p115
+sg97
+S'<module>'
+p116
+sa(dp117
+g74
+S'/home/aman/web2py_mint/gluon/packages/dal/pydal/base.py'
+p118
+sg76
+(dp119
+S'fields'
+p120
+S'(<pydal.objects.Field object>, <pydal.objects.Field object>, <pydal.objects.Field object>)'
+p121
+sS'self'
+p122
+S'<DAL uri="sqlite://storage.sqlite">'
+p123
+sS'args'
+p124
+g21
+sS'tablename'
+p125
+S"'post1'"
+p126
+sS'table'
+p127
+S'undefined'
+p128
+sS'self.lazy_define_table'
+p129
+S'<bound method DAL.lazy_define_table of <DAL uri="sqlite://storage.sqlite">>'
+p130
+ssg82
+I834
+sg83
+(dp131
+I832
+S'            table = None'
+p132
+sI833
+S'        else:'
+p133
+sI834
+S'            table = self.lazy_define_table(tablename,*fields,**args)'
+p134
+sI835
+S'        if not tablename in self.tables:'
+p135
+sI836
+S'            self.tables.append(tablename)'
+p136
+sI837
+S'        return table'
+p137
+sI838
+S''
+sI829
+S'                    % (tablename,invalid_args))'
+p138
+sI830
+S'        if self._lazy_tables and tablename not in self._LAZY_TABLES:'
+p139
+sI831
+S'            self._LAZY_TABLES[tablename] = (tablename,fields,args)'
+p140
+ssg95
+S'(self=<DAL uri="sqlite://storage.sqlite">, tablename=\'post1\', *fields=(<pydal.objects.Field object>, <pydal.objects.Field object>, <pydal.objects.Field object>), **args={})'
+p141
+sg97
+S'define_table'
+p142
+sa(dp143
+g74
+S'/home/aman/web2py_mint/gluon/packages/dal/pydal/base.py'
+p144
+sg76
+(dp145
+S'polymodel'
+p146
+S'None'
+p147
+ssg82
+I873
+sg83
+(dp148
+I868
+S'            try:'
+p149
+sI869
+S'                GLOBAL_LOCKER.acquire()'
+p150
+sI870
+S'                self._lastsql = self._adapter.create_table('
+p151
+sI871
+S'                    table,migrate=migrate,'
+p152
+sI872
+S'                    fake_migrate=fake_migrate,'
+p153
+sI873
+S'                    polymodel=polymodel)'
+p154
+sI874
+S'            finally:'
+p155
+sI875
+S'                GLOBAL_LOCKER.release()'
+p156
+sI876
+S'        else:'
+p157
+sI877
+S'            table._dbt = None'
+p158
+ssg95
+S'(self=<DAL uri="sqlite://storage.sqlite">, tablename=\'post1\', *fields=(<pydal.objects.Field object>, <pydal.objects.Field object>, <pydal.objects.Field object>), **args={})'
+p159
+sg97
+S'lazy_define_table'
+p160
+sa(dp161
+g74
+S'/home/aman/web2py_mint/gluon/packages/dal/pydal/adapters/base.py'
+p162
+sg76
+(dp163
+S'field_type'
+p164
+S"'box'"
+p165
+sS'field_name'
+p166
+S"'post'"
+p167
+ssg82
+I385
+sg83
+(dp168
+I384
+S"                raise SyntaxError('Field: unknown field type: %s for %s' % \\"
+p169
+sI385
+S'                    (field_type, field_name))'
+p170
+sI386
+S'            else:'
+p171
+sI387
+S"                ftype = types[field_type] % {'length':field.length}"
+p172
+sI388
+S''
+sI389
+S"            if not field_type.startswith(('id','reference', 'big-reference')):"
+p173
+sI380
+S'                                         fieldname=field_name, srid=srid,'
+p174
+sI381
+S'                                         dimension=dimension)'
+p175
+sI382
+S'                    postcreation_fields.append(ftype)'
+p176
+sI383
+S'            elif field_type not in types:'
+p177
+ssg95
+S'(self=<pydal.adapters.sqlite.SQLiteAdapter object>, table=<Table post1 (id, project_id, author, post)>, migrate=True, fake_migrate=False, polymodel=None)'
+p178
+sg97
+S'create_table'
+p179
+sasS'pyver'
+p180
+S'Python 2.7.10: /usr/bin/python (prefix: /usr)'
+p181
+sS'session'
+p182
+g69
+(S's\xb1\n\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">auth</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">expiration</td><td style="vertical-align:top;">:</td><td><div>3600</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">hmac_key</td><td style="vertical-align:top;">:</td><td><div>694643c4-67e4-42ea-80d2-909680ba4aa4</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">last_visit</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 4, 29, 23, 27, 36, 887820)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remember_me</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">user</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">email</td><td style="vertical-align:top;">:</td><td><div>p@gmail.com</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">first_name</td><td style="vertical-align:top;">:</td><td><div>ama</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">id</td><td style="vertical-align:top;">:</td><td><div>1L</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">last_name</td><td style="vertical-align:top;">:</td><td><div>lasanji</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">phone</td><td style="vertical-align:top;">:</td><td><div>1417481</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">profession</td><td style="vertical-align:top;">:</td><td><div>Student(Undergrad)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">registration_id</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">registration_key</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">reset_password_key</td><td style="vertical-align:top;">:</td><td><div>1459793452-3630d304-58de-4604-972e-40fd9ce49139</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">user_type</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">user_groups</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">1</td><td style="vertical-align:top;">:</td><td><div>user_1</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr></table></div>'
+tRp183
+sS'etype'
+p184
+S"<type 'exceptions.SyntaxError'>"
+p185
+sS'date'
+p186
+S'Fri Apr 29 23:32:10 2016'
+p187
+sS'response'
+p188
+g69
+(S'su\x17\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">body</td><td style="vertical-align:top;">:</td><td><div>&lt;cStringIO.StringO object at 0x7f4b04141c38&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_projectify</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div>/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">delimiters</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>{{</div></td></tr><tr><td><div>}}</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">files</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">form_label_separator</td><td style="vertical-align:top;">:</td><td><div>: </div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">formstyle</td><td style="vertical-align:top;">:</td><td><div>table3cols</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">generic_patterns</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>*</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">headers</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">X-Powered-By</td><td style="vertical-align:top;">:</td><td><div>web2py</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">menu</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">meta</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">models_to_run</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>^\\w+\\.py$</div></td></tr><tr><td><div>^default/\\w+\\.py$</div></td></tr><tr><td><div>^default/show/\\w+\\.py$</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">postprocessing</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_client</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_compression_level</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_expires</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_data_name</td><td style="vertical-align:top;">:</td><td><div>session_data_projectify</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_file</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;/home/aman/web2py_mint/applications/projectify/sessions/1dd/0c1/127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6&#x27;, mode &#x27;rb+&#x27; at 0x7f4b0899bc00&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_filename</td><td style="vertical-align:top;">:</td><td><div>/home/aman/web2py_mint/applications/projectify/sessions/127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_hash</td><td style="vertical-align:top;">:</td><td><div>61315a82892f0a1b9dbdb658c76b0041</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-74b03486-e159-4a9e-b839-b732f74853c6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_name</td><td style="vertical-align:top;">:</td><td><div>session_id_projectify</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_locked</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_masterapp</td><td style="vertical-align:top;">:</td><td><div>projectify</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_new</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_storage_type</td><td style="vertical-align:top;">:</td><td><div>file</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">status</td><td style="vertical-align:top;">:</td><td><div>200</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">view</td><td style="vertical-align:top;">:</td><td><div>default/show.html</div></td></tr></table></div>'
+tRp189
+sS'locals'
+p190
+(dp191
+S'rtablename'
+p192
+S"'project'"
+p193
+sS'referenced'
+p194
+S"'project'"
+p195
+sS'migrate'
+p196
+S'True'
+p197
+sS'constraint_name'
+p198
+S"'post1_project_id__constraint'"
+p199
+sS'table'
+p200
+S'<Table post1 (id, project_id, author, post)>'
+p201
+sS'real_referenced'
+p202
+S"'project'"
+p203
+sS'postcreation_fields'
+p204
+S'[]'
+p205
+sS'field_type'
+p206
+S"'box'"
+p207
+sS'self'
+p208
+S'<pydal.adapters.sqlite.SQLiteAdapter object>'
+p209
+sS'type_name'
+p210
+S"'reference'"
+p211
+sS'tablename'
+p212
+S"'post1'"
+p213
+sS'field'
+p214
+S'<pydal.objects.Field object>'
+p215
+sS'ftype'
+p216
+S"'CHAR(512)'"
+p217
+sS'rtable'
+p218
+S'<Table project (id, project_title, time_of_uploa...on, likes, category, type_of_project, downloads)>'
+p219
+sS'id_fieldname'
+p220
+S"'id'"
+p221
+sS'polymodel'
+p222
+S'None'
+p223
+sS'rfieldname'
+p224
+S"'id'"
+p225
+sS'ftype_info'
+p226
+S"{'constraint_name': 'post1_project_id__constraint', 'field_name': 'project_id', 'foreign_key': 'project (id)', 'index_name': 'project_id__idx', 'null': '', 'on_delete_action': 'CASCADE', 'unique': ''}"
+p227
+sS'db'
+p228
+S'<DAL uri="sqlite://storage.sqlite">'
+p229
+sS'fake_migrate'
+p230
+S'False'
+p231
+sS'sql_fields'
+p232
+S"{'author': {'length': 512, 'notnull': False, 'sortable': 3, 'sql': 'CHAR(512)', 'type': 'string', 'unique': False}, 'id': {'length': 512, 'notnull': False, 'sortable': 1, 'sql': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'type': 'id', 'unique': False}, 'project_id': {'length': 512, 'notnull': False, 'sortable': 2, 'sql': 'INTEGER REFERENCES project (id) ON DELETE CASCADE  ', 'type': 'reference project', 'unique': False}}"
+p233
+sS'field_name'
+p234
+S"'post'"
+p235
+sS'types'
+p236
+S"{'big-id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'big-reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s %(null)s %(unique)s', 'bigint': 'INTEGER', 'blob': 'BLOB', 'boolean': 'CHAR(1)', 'date': 'DATE', 'datetime': 'TIMESTAMP', 'decimal': 'DOUBLE', 'double': 'DOUBLE', 'float': 'DOUBLE', ...}"
+p237
+sS'sortable'
+p238
+S'4'
+sS'sql_fields_aux'
+p239
+S"{'author': {'sql': 'CHAR(512)'}, 'id': {'sql': 'INTEGER PRIMARY KEY AUTOINCREMENT'}, 'project_id': {'sql': 'INTEGER REFERENCES project (id) ON DELETE CASCADE  '}}"
+p240
+sS'TFK'
+p241
+g21
+sS'fields'
+p242
+S"['id INTEGER PRIMARY KEY AUTOINCREMENT', 'project_id INTEGER REFERENCES project (id) ON DELETE CASCADE  ', 'author CHAR(512)']"
+p243
+sS'rfield'
+p244
+S'<pydal.objects.Field object>'
+p245
+sssS'traceback'
+p246
+S'Traceback (most recent call last):\n  File "/home/aman/web2py_mint/gluon/restricted.py", line 227, in restricted\n    exec ccode in environment\n  File "/home/aman/web2py_mint/applications/projectify/models/db.py", line 128, in <module>\n    Field(\'post\',\'box\'))\n  File "/home/aman/web2py_mint/gluon/packages/dal/pydal/base.py", line 834, in define_table\n    table = self.lazy_define_table(tablename,*fields,**args)\n  File "/home/aman/web2py_mint/gluon/packages/dal/pydal/base.py", line 873, in lazy_define_table\n    polymodel=polymodel)\n  File "/home/aman/web2py_mint/gluon/packages/dal/pydal/adapters/base.py", line 385, in create_table\n    (field_type, field_name))\nSyntaxError: Field: unknown field type: box for post\n'
+p247
+s.

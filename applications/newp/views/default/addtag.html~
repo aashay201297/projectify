@@ -1,0 +1,4 @@
+{{extend 'layout.html'}}
+<h1>Search Combined</h1>
+[ {{=A('listall2', _href=URL('index'))}}]<br />
+{{=form}}<brs />{{=target_div}}

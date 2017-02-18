@@ -1,0 +1,38 @@
+{{extend 'layout.html'}}
+<center>
+<h1>Images</h1>
+<ul>
+<table border="solid" width="70%">
+  <tr>
+    <th><center>Name of Image</center></th>
+    <th><center>Image</center></th>
+    <th><center>Description</center></th>
+  </tr>
+{{for i,im in enumerate(rows):}}
+{{row=im}}
+{{if i==items_per_page: break}}
+  <tr>
+    <td align="center">
+      {{=(A(im.title, _href=URL("show",args=im.id)))}}
+    </td>
+    <td align="center">
+      <img width="200px" src="{{=URL('download',args=im.image)}}"/>
+    </td>
+    <td align="center">
+      {{=row.description[0:30]+"..."}}
+    </td>
+  </tr>
+{{pass}}
+</table>
+<br><br><br>
+
+
+{{if page:}}
+<a href="{{=URL(args=[page-1])}}"><button>Previous</button></a>
+{{pass}}
+
+{{if len(rows)>items_per_page:}}
+<a href="{{=URL(args=[page+1])}}"><button>Next</button></a>
+{{pass}}
+</ul>
+</center>

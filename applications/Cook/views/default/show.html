@@ -1,0 +1,73 @@
+{{extend 'layout.html'}}
+<head>
+	<style>
+		.blocking{
+			display:inline-block;
+		}
+#data{
+	padding:10px;
+	width:400px;
+}
+		#image{
+			vertical-align:top;
+		}	
+.like{
+	font-size:1.5em;
+color:blue;
+
+}
+.container{
+	display:inline-block;
+
+}
+.title{
+	font-style:bold;
+	font-size:1.1em;
+		color:green;
+}
+	</style>	
+</head>
+<h1> Dish Title: <i><b> {{=rec.Dish}} </b></i></h1>
+ <div class="container">
+<div class="blocking" id="image" >
+		<img width=400px
+		     src="{{=URL('download', args=rec.image)}}"/>
+</div>
+<div class="blocking" id="data">
+	<ul> <i><u>Other info about the recipe</u></i>
+<li style="padding:10px">
+<span class="title">
+	Upload time: </span>{{=rec.Time_of_upload}}</li>
+<li style="padding:10px">
+<span class="title">
+	Ingredients used: </span>{{=rec.Ingredients}}</li>
+<li style="padding:10px">
+<span class="title">
+	Genre of dish: </span>{{=rec.Dish_type}}</li>
+{{pass}}
+<li style="padding:10px">
+<span class="title">
+	Procedure: </span>{{=rec.Process}}</li>
+<li style="padding:10px">
+<span class="title">
+	Type : </span>{{=rec.veg_or_not}}</li>
+<li style="padding:10px">
+<span class="title">
+	Time required : </span>{{=rec.Approximate_time_to_cook}}</li>
+</ul>
+</div>
+</div>
+{{=form}}
+No. of likes: <p class="like">{{=votes-1}}</p>
+<h2>Comments</h2>
+{{if len(tem):}}
+{{for post in tem:}}
+<h4>
+<p><b>{{=db.auth_user[post.created_by].first_name}} : </b><i>{{=post.Comment_box}}</i> ------((on<u> {{=post.created_on}}</u>))</p>
+{{pass}}
+</h4>
+{{else:}}
+<p> No comments yet. </p>
+{{pass}}
+<h2>Post a comment</h2>
+{{=form5}}

@@ -1,0 +1,62 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+img {
+}
+.inl{
+display:inline-block;
+margin:0 20px;
+       float:left;
+	width:500px;
+}
+#top{
+	padding-top:-100px;
+}
+img{
+margin:10px;
+}
+.red{
+color:red;
+      font-size:1.2em;
+}
+.green{
+color:green;
+}
+</style>
+</head>
+<body>
+<div class="cont">
+<div class="inl">
+<img height=250px src="{{=URL('download',args=rec.Profile_pic)}}"/>
+</div>
+<div class="inl">
+<h2><span class="red">Name </span> :  {{=rec.first_name}}  {{=rec.last_name}}</h2>
+<h2><span class="red">Email</span> :  {{=rec.email}}</h2>
+<h2><span class="red">Phone</span> : {{=rec.phone}}</h2>  
+<h2><span class="red">Profession</span> : {{=rec.profession}}</h2>
+<h2><span class="green"><i>He is a  {{=rec.user_type}}</i></span></h2>
+<hr>
+<br>
+</div>
+{{if rec.user_type=='Developer':}}
+{{if len(pubpro):}}
+<div class="inl">
+<h2>List of projects developed by <i>{{=rec.first_name}}</i></h2>
+<hr>
+<ol>
+{{for p in pubpro:}}
+<h2>
+<li>
+{{=A(p.project_title,_href=URL('show',args=p.id))}}
+</li>
+{{pass}}
+</ol>
+</div>
+{{else:}}
+<h2> I did not upload any projects! </h2>
+{{pass}}
+{{else:}}
+<h2>I cannot develop projects! I am a VIEWER!</h2>
+{{pass}}
+</div>
+</body>

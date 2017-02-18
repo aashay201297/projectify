@@ -1,0 +1,55 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+.head{
+color:red;
+      text-align:center;
+	      width:20%;
+}
+table{
+	font-size:1.5em;
+}
+.dat{
+padding:10px;
+	text-align:center;
+}
+</style>
+</head>
+<table>
+<tr>
+<th class="head">Name</th>
+<th class="head">Image</th>
+<th class="head">Dish type</th>
+<th style="padding:10px" class="head">Appx. time to cook</th>
+</tr>
+{{for i,row in enumerate(rows):}}
+{{if i==recent_cooks: break}}
+<tr>
+<td class="dat" style="width:20%">{{=(A(row.Dish, _href=URL("show2", args=row.id)))}}</td>
+<td class="dat" style=""><img height="150px" width= "200px" src="{{=URL('download',args=rows[i].image)}}"/></td>
+{{if row.veg_or_not=="Non-veg":}}
+<td class="dat" style="text-align:center; color:red">{{=row.veg_or_not}}</td>
+{{pass}}
+{{if row.veg_or_not=="only Egg":}}
+<td class="dat" style="text-align:center; color:yellow">{{=row.veg_or_not}}</td>
+{{pass}}
+{{if row.veg_or_not=="Veg":}}
+<td class="dat" style="text-align:center; color:green">{{=row.veg_or_not}}</td>
+{{pass}}
+<td class="dat" style="width:20%">{{=row.Approximate_time_to_cook}}</td>
+
+</tr>
+{{pass}}
+</table>
+
+{{if page:}}
+<a href="{{=URL(args=[page-1])}}">previous</a>
+{{else:}}
+<p style="display: inline-block">previous</p>
+{{pass}}
+
+{{if len(rows) > recent_cooks:}}
+<a href="{{=URL(args=[page+1])}}">next</a>
+{{else:}}
+<p style="display: inline-block">next</p>
+{{pass}}

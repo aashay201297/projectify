@@ -1,0 +1,17 @@
+{{extend 'layout.html'}}
+{{=form}}
+{{if var==1:}}
+<h3>Category is of invalid type. It can be only among "Mathematics", "Web developement", "App Developement", "Programming language"</h3>
+{{else:}}
+{{if len(ans):}}
+{{for row in ans:}}
+<h2>
+<p>{{=A(row.project_title,_href=URL('show',args=row.id))}} {{='titled project is of required category'}} 
+</p>
+</h2>
+
+{{pass}}
+{{else:}}
+{{='No results'}}
+{{pass}}
+{{pass}}

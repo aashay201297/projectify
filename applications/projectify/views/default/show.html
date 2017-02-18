@@ -1,0 +1,73 @@
+<head>
+<style>
+.conti{
+margin:10px 100px;
+float:right;
+      text-align:center;
+}
+.head{
+	font-style:bold;
+color:green;
+      font-style:italic;
+}
+.cente{
+	width:1745px;
+	text-align:center;
+	background-color:lightgreen;
+padding:10px 0;
+}
+</style>
+</head>
+{{extend 'layout.html'}}
+{{print "x=",x,rec.type_of_project}}
+{{if x==1 or rec.type_of_project=='public':}}
+<div style="display: inline-block;">
+<div class="cente">
+<h1>Name of the project: {{=rec.project_title}}</h1>
+<p style="font-size: 20px;">Number of likes : <i>{{=votes-1}}</i></p>
+{{=form}} 
+<a href="{{=URL('download_a',args=rec.id)}}">Download this project</a>
+{{if int(rec.author_name)==int(auth.user.id):}}
+<h2>{{=A("Edit",_href=URL('edit',args=rec.id))}}</h2>
+{{else:}}
+{{pass}}
+</div>
+{{if rec.type_of_project=='psuedo-private':}}
+<div class="conti">
+<h2> List of all contributors of this project </h2>
+{{for con in con_list:}}
+<p>{{=A(con,_href=URL('profile',args=con))}}</p>
+{{pass}}
+{{pass}}
+{{if rec.type_of_project=='psuedo-private' and int(auth.user.id)==int(rec.author_name):}}
+<h2>{{=A('Add Contributor',_href=URL('add_contributor',args=rec.id))}}</h2>
+<img src="/projectify/static/images/add_contri.jpg">
+{{else:}}
+{{pass}}
+</div>
+<h2><span class="head">Description: </span>{{=rec.description}}</h2>
+{{a=str(db(db.auth_user.id==rec.author_name).select(db.auth_user.first_name))}}
+{{print "first name=",a}}
+{{q=a.split()}}
+{{print "firs",q[1]}}
+<h2><span class="head">Owner : </span>{{=A(q[1], _href=URL('profile',args=rec.author_name))}}</h2>
+<h2><span class="head">Category : </span>{{=rec.category}}</h2>
+<h2><span class="head">Type of project : </span>{{=rec.type_of_project}}</h2>
+{{if len(comments):}}
+<h2>Comments</h2><p>
+{{for post in comments:}}
+<p>{{=post.author}} says <i>{{=post.post}}</i></p>
+{{pass}}</p>
+{{else:}}
+<h2>NO comments posted yet</h2>
+{{pass}}
+<h2>Post a comment</h2>
+{{=form1}}
+{{print "type=",rec.type_of_project}}
+<h2>{{=A("Rate and review this project",_href=URL('rating',args=rec.id))}}</h2>
+{{else:}}
+<p style="text-align:center; font-size:2em; color:red;"> 
+This is not a public project. You are not authorised to view this project!!! 
+<img src="/projectify/static/images/not_authorised.jpg">
+</p>
+{{pass}}

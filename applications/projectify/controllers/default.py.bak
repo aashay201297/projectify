@@ -1,0 +1,242 @@
+# -*- coding: utf-8 -*-
+# this file is released under public domain and you can use without limitations
+
+#########################################################################
+## This is a sample controller
+## - index is the default action of any application
+## - user is required for authentication and authorization
+## - download is for downloading files uploaded in the db (does streaming)
+#########################################################################
+
+def index():
+    """
+    example action using the internationalization operator T and flash
+    rendered by views/default/index.html or views/generic.html
+
+    if you need a simple wiki simply replace the two lines below with:
+    return auth.wiki()
+    """
+    response.flash = T("Welcome to projectify!")
+    return dict(message=T('Welcome to web2py!'))
+@auth.requires_login()
+def allprofiles():
+	users=db().select(db.auth_user.ALL)
+	return dict(users=users)
+def profile():
+        rec = db.auth_user(request.args(0,cast=int))
+        i=request.args(0,cast=int)
+        recid=request.args(0,cast=int) or redirect(URL('allprofiles'))
+        pubpro=db((db.project.author_name==rec.id)).select()
+        return dict(i=i,rec=rec,recid=recid,pubpro=pubpro)
+
+
+@auth.requires_login()
+def upload():
+	import datetime
+	now=datetime.datetime.now()
+	db.project.author_name.readable=db.project.author_name.writable= False
+	upform=SQLFORM(db.project)
+#	form1=SQLFORM(db.cat)
+	#form2=SQLFORM(db.subcat)
+	if upform.process().accepted:
+		cur=upform.vars.id
+		row = db(db.project.id==cur).select().first()
+        	row.update_record(author_name=auth.user.id)
+        	row.update_record(time_of_upload=now)
+        	db.conti.insert(contributor=auth.user.id,project_id=cur)
+        	response.flash = "1 record inserted"
+        	redirect(URL('category()',args=cur))
+    	elif upform.errors:
+        	response.flash = "Errors"
+	else:
+        	response.flash = "Please fill the form"
+	return dict(upform=upform)
+@auth.requires_login()
+def category():
+	form=SQLFORM(db.subcat)
+	cur=request.args[1]
+	print 'cur=',cur[1]
+	if form.process().accepted:
+		curcat=int(form.vars.id)
+		catrow=db(db.subcat.id==curcat).select().first()
+		row= db(db.project.id==cur).select().first()
+                x=db(db.cat.id==catrow.category).select().first()
+                print 'row=',row
+                row.update_record(category=x.category)
+		#print "catrow=",catrow.category
+		#row.update_record(category=catrow.category)
+		#print row
+		response.flash = "categorised"
+		redirect(URL('projects'))
+	elif form.errors:
+		response.flash="Errors"
+	else:
+		response.flash="Please fill the form"
+	return dict(form=form)
+@auth.requires_login()
+def projects():
+	if len(request.args):
+		print "if"
+		page=int(request.args[0])
+	else: 
+		page=0
+	items_per_page=5
+	limitby=(page*items_per_page,(page+1)*items_per_page+1)
+	rows=db().select(db.project.ALL, limitby=limitby, orderby=~db.project.time_of_upload)
+	return dict(rows=rows,page=page,items_per_page=items_per_page)
+@auth.requires_login()
+def show():
+	rec = db.project(request.args(0,cast=int))
+        i=request.args(0,cast=int)
+        recid=request.args(0,cast=int) or redirect(URL('projects'))
+        cons=db(db.conti.project_id==recid).select()
+        x=0
+        for con in cons:
+                if auth.user.id==con.contributor:
+                        x=1
+                        break
+        if x==1:
+                like_str=str(db(db.project.id==request.args[0]).select(db.project.likes))
+                vot=(like_str.split())
+                votes=len(vot)
+                if vot[1]=='""':
+                    votes=1
+                form = FORM(BUTTON('Like / Unlike',_type='submit'),
+                            _action=URL('default','like',args=recid))
+                db.post1.project_id.default=rec.id
+                db.post1.project_id.writable=db.post1.project_id.readable=False
+                db.post1.author.writable=db.post1.author.readable=False
+                form1=SQLFORM(db.post1)
+                if form1.process().accepted:
+                        cur=form1.vars.id
+                        q=str(db(db.auth_user.id==auth.user.id).select(db.auth_user.first_name))
+                        a=q.split()
+                        row = db(db.post1.id==cur).select().first()
+                        row.update_record(author=a[1])
+                        response.flash = 'your comment is posted'
+                comments = db(db.post1.project_id==rec.id).select()
+                return dict(rec=rec,recid=recid,form=form, votes=votes,comments=comments,form1=form1,x=1)
+        else:
+                return dict(x=0)
+def add_contributor():
+        db.conti.project_id.writable=db.conti.project_id.readable=False
+        addform=SQLFORM(db.conti)
+        recid=request.args[0]
+        if addform.process().accepted:
+                cur=addform.vars.id
+                row = db(db.conti.id==cur).select().first()
+                row.update_record(project_id=recid)
+                response.flash='contributor added'
+                redirect(URL('show',args=recid))
+        return dict(addform=addform)
+        #return dict(rec=rec,recid=recid,)
+
+
+
+@auth.requires_login()
+def like():
+	from re import match
+	recid=request.args[0]
+	like_str=str(db(db.project.id==request.args[0]).select(db.project.likes))
+	like_list=[x for x in like_str.split() if match('^[0-9]*$',x)]
+	if str(auth.user.id) not in like_list:
+		like_list.append(str(auth.user.id))
+		db(db.project.id==request.args[0]).update(likes=(' ').join(like_list))
+	else:
+	        like_list.remove(str(auth.user.id))
+	        db(db.project.id==request.args[0]).update(likes=(' ').join(like_list))
+	return dict(l=like_list,recid=recid)
+@auth.requires_login()
+def myprofile():
+#        rec = db.auth_user(request.args(0,cast=int))
+#	print rec
+#        i=request.args(0,cast=int)
+#        recid=request.args(0,cast=int) or redirect(URL('allprofiles'))
+#	pubpro=db(db.project.author_name==auth.user.id).select()
+	redirect(URL('profile',args=auth.user.id))
+	return dict(pubpro=pubpro)
+@auth.requires_login()
+def searchbytitle():
+	form=FORM(INPUT(_type="string",_name="title",_placeholder="a piece of string in title",requires=IS_NOT_EMPTY()))
+	ans=[];
+	if form.process().accepted:
+		response.flash="Required search is applied"
+	elif form.errors:
+		response.flash="Please fill the form COMPLETELY"
+	else:
+		response.flash="Fill this form completely to search"
+	if len(request.vars) != 0:
+		s=request.vars["title"]
+		ans=db(db.project.project_title.like("%"+s+"%")).select()
+	return dict(ans=ans,form=form)
+@auth.requires_login()
+def search():
+	a=10
+	return dict(a=a);
+
+@auth.requires_login()
+def searchbyperson():
+	form=FORM(INPUT(_type="string",_name="person",_placeholder="a piece of string in name of person",requires=IS_NOT_EMPTY()))
+	ans=[];
+	if form.process().accepted:
+		response.flash="Required search is applied"
+	elif form.errors:
+		response.flash="Please fill the form COMPLETELY"
+	else:
+		response.flash="Fill this form completely to search"
+	if len(request.vars) != 0:
+		s=request.vars["person"]
+		ans=db(db.project.author_name.like("%"+s+"%")).select()
+	return locals()
+	
+@auth.requires_login()
+def searchbycat():
+	form=FORM(INPUT(_type="string",_name="category",requires=IS_IN_SET(['Programming language','Mathematics','Web development','App development'])))
+	ans=[];
+	if form.process().accepted:
+		response.flash="Required search is applied"
+	elif form.errors:
+		response.flash="Please fill the form COMPLETELY"
+	else:
+		response.flash="Fill this form completely to search"
+	if len(request.vars) != 0:
+		s=request.vars["category"]
+		ans=db(db.project.category.like("%"+s+"%")).select()
+	return locals()
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    http://..../[app]/default/user/bulk_register
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
+    """
+    return dict(form=auth())
+
+
+@cache.action()
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request, db)
+
+
+def call():
+    """
+    exposes services. for example:
+    http://..../[app]/default/call/jsonrpc
+    decorate with @services.jsonrpc the functions to expose
+    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
+    """
+    return service()

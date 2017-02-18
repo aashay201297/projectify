@@ -1,0 +1,64 @@
+{{extend 'layout.html'}}
+
+<img width = "500px" src="{{=URL('download',args=x[0].profile_picture)}}"/>
+
+<p>{{=x[0].first_name}} {{=x[0].last_name}}</p>
+<ul>
+  <li>Username : {{=x[0].username}}</li>
+  <li>Email id : {{=x[0].email}}</li>
+  <li>Phone no.: {{=x[0].phone}}</li>
+</ul>
+
+<center>
+<h1>{{=x[0].username}}'s Images</h1>
+<ul>
+<table border="solid" width="70%">
+  <tr>
+    <th><center>Name of Image</center></th>
+    <th><center>Image</center></th>
+    <th><center>Description</center></th>
+  </tr>
+{{for i,im in enumerate(rows):}}
+{{row=im}}
+  <tr>
+    <td align="center">
+      {{=(A(im.title, _href=URL("show",args=im.id)))}}
+    </td>
+    <td align="center">
+      <img width="200px[0]" src="{{=URL('download',args=im.image)}}"/>
+    </td>
+    <td align="center">
+      {{=row.description[0:30]+"..."}}
+    </td>
+  </tr>
+{{pass}}
+</table>
+<br><br><br>
+<h1>{{=x[0].username}}'s Comments</h1>
+<ul>
+<table border="solid" width="70%">
+  <tr>
+    <th><center>Name of Image</center></th>
+    <th><center>Image</center></th>
+    <th><center>Comment</center></th>
+  </tr>
+{{for i,cm in enumerate(coms):}}
+{{row=cm}}
+  <tr>
+    <td align="center">
+      {{=(A(cm.image_id.title, _href=URL("show",args=cm.image_id.id)))}}
+    </td>
+    <td align="center">
+      <img width="200px" src="{{=URL('download',args=cm.image_id.image)}}"/>
+    </td>
+    <td>
+      {{=cm.body}}
+    </td>
+  </tr>
+{{pass}}
+</table>
+<br><br><br>
+
+
+</ul>
+</center>

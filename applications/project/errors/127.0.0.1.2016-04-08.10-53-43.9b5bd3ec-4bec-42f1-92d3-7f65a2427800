@@ -1,0 +1,21 @@
+(dp1
+S'output'
+p2
+S"<type 'exceptions.TypeError'> 'IS_NOT_EMPTY' object does not support indexing"
+p3
+sS'layer'
+p4
+S'/home/aman/web2py_mint/applications/project/controllers/default.py'
+p5
+sS'code'
+p6
+S'# -*- coding: utf-8 -*-\n# this file is released under public domain and you can use without limitations\n\n#########################################################################\n## This is a sample controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n#########################################################################\n\ndef index():\n    """\n    example action using the internationalization operator T and flash\n    rendered by views/default/index.html or views/generic.html\n\n    if you need a simple wiki simply replace the two lines below with:\n    return auth.wiki()\n    """\n    response.flash = T("Welcome to projectify!")\n    return dict(message=T(\'Welcome to web2py!\'))\n@auth.requires_login()\ndef upload():\n\tupform=SQLFORM(db.project)\n\treturn dict(upform=upform)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login\n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    http://..../[app]/default/user/bulk_register\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users\n    """\n    return dict(form=auth())\n\n\n@cache.action()\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request, db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    return service()\n\n\n\nresponse._vars=response._caller(user)\n'
+p7
+sS'snapshot'
+p8
+(dp9
+sS'traceback'
+p10
+S'Traceback (most recent call last):\n  File "/home/aman/web2py_mint/gluon/restricted.py", line 227, in restricted\n    exec ccode in environment\n  File "/home/aman/web2py_mint/applications/project/controllers/default.py", line 65, in <module>\n  File "/home/aman/web2py_mint/gluon/globals.py", line 417, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/aman/web2py_mint/applications/project/controllers/default.py", line 42, in user\n    return dict(form=auth())\n  File "/home/aman/web2py_mint/gluon/tools.py", line 1938, in __call__\n    return getattr(self, args[0])()\n  File "/home/aman/web2py_mint/gluon/tools.py", line 3336, in register\n    extra_fields=extra_fields\n  File "/home/aman/web2py_mint/gluon/sqlhtml.py", line 1295, in __init__\n    inp = self.widgets.options.widget(field, default)\n  File "/home/aman/web2py_mint/gluon/sqlhtml.py", line 313, in widget\n    options = requires[0].options()\n  File "/home/aman/web2py_mint/gluon/validators.py", line 453, in options\n    items = [(k, self.labels[i]) for (i, k) in enumerate(self.theset)]\nTypeError: \'IS_NOT_EMPTY\' object does not support indexing\n'
+p11
+s.

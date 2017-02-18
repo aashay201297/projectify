@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+<h2> Top contributors </h2>
+<br>
+<ol>
+{{for i in rows1:}}
+<li> {{=A(i.first_name,_href=URL('profile',args=i.id))}} has developed {{=i.uploads}} projects</li>
+<br>
+{{pass}}
+{{pass}}
+</ol>
+

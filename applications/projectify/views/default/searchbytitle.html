@@ -1,0 +1,12 @@
+{{extend 'layout.html'}}
+{{=form}}
+{{print ans}}
+{{if len(ans):}}
+{{for row in ans:}}
+<p>{{=A(row.project_title,_href=URL('show',args=row.id))}} {{='titled project is developed by'}} <i>{{=A(row.author_name, _href=URL('profile',args=row.author_name))}}</i>
+</p>
+
+{{pass}}
+{{else:}}
+{{='No results'}}
+{{pass}}

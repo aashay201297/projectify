@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+<div style="text-align:center;">
+<img src="/projectify/static/images/search.png">
+</div>
+<h4>
+<ol>
+<br>
+<li>{{=(A('Search by project title',_href=URL('searchbytitle')))}}</li>
+<br>
+<li>{{=(A('Search by person(developer)',_href=URL('searchbyperson')))}}</li>
+<br>
+<li>{{=(A('Search by category',_href=URL('searchbycat')))}}</li>
+<br>
+</ol>
+</h4>

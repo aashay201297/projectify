@@ -1,0 +1,17 @@
+{{extend 'layout.html'}}
+<div style="text-align:center;">
+<img src="/projectify/static/images/sort.png">
+</div>
+<h4>
+<ol>
+<br>
+<li>{{=(A('Most downloaded',_href=URL('sortbydow')))}}</li>
+<br>
+<li>{{=(A('Most rated',_href=URL('sortbyrat')))}}</li>
+<br>
+<li>{{=(A('Recently added',_href=URL('sortbyadd')))}}</li>
+<br>
+<li>{{=(A('Top contributors',_href=URL('sortbycon')))}}</li>
+<br>
+</ol>
+</h4>

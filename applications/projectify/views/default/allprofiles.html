@@ -1,0 +1,22 @@
+{{extend 'layout.html'}}
+<head>
+<style>
+img{
+	border-radius:10px;
+}
+</style>
+</head>
+<ol>
+{{for i in users:}}
+{{print "USER=",i.id}}
+{{print "image=",i.Profile_pic}}
+<br>
+<li>{{=A(i.first_name+" "+i.last_name,_href=URL('profile',args=i.id))}}</li>
+<div class="blocking" id="image" >
+                <img width=100px
+                     src="{{=URL('download',args=i.Profile_pic)}}"/>
+</div>
+{{pass}}
+</ol>
+
+

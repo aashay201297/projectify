@@ -1,0 +1,78 @@
+{{extend 'layout.html'}}
+
+
+<img width = "500px" src="{{=URL('download',args=x.profile_picture)}}"/>
+
+<p>{{=x.first_name}} {{=x.last_name}}</p>
+<ul>
+  <li>Username : {{=x.username}}</li>
+  <li>Email id : {{=x.email}}</li>
+  <li>Phone no.: {{=x.phone}}</li>
+</ul>
+
+<center>
+<h1>My Images</h1>
+<ul>
+<table border="solid" width="70%">
+  <tr>
+    <th><center>Name of Image</center></th>
+    <th><center>Image</center></th>
+    <th><center>Description</center></th>
+    <th><center>Edit</center></th>
+  </tr>
+{{for i,im in enumerate(rows):}}
+{{row=im}}
+{{if i==items_per_page: break}}
+  <tr>
+    <td align="center">
+      {{=(A(im.title, _href=URL("show",args=im.id)))}}
+    </td>
+    <td align="center">
+      <img width="200px" src="{{=URL('download',args=im.image)}}"/>
+    </td>
+    <td align="center">
+      {{=row.description[0:30]+"..."}}
+    </td>
+    <td>
+      {{=A('Edit', _href=URL("edit",args=im.id))}}
+    </td>
+  </tr>
+{{pass}}
+</table>
+<br><br><br>
+<h1>My Comments</h1>
+<ul>
+<table border="solid" width="70%">
+  <tr>
+    <th><center>Name of Image</center></th>
+    <th><center>Image</center></th>
+    <th><center>Comment</center></th>
+  </tr>
+{{for i,cm in enumerate(coms):}}
+{{row=cm}}
+{{if i==items_per_page: break}}
+  <tr>
+    <td align="center">
+      {{=(A(cm.image_id.title, _href=URL("show",args=cm.image_id.id)))}}
+    </td>
+    <td align="center">
+      <img width="200px" src="{{=URL('download',args=cm.image_id.image)}}"/>
+    </td>
+    <td>
+      {{=cm.body}}
+    </td>
+  </tr>
+{{pass}}
+</table>
+<br><br><br>
+
+
+{{if page:}}
+<a href="{{=URL(args=[page-1])}}"><button>Previous</button></a>
+{{pass}}
+
+{{if len(rows)>items_per_page:}}
+<a href="{{=URL(args=[page+1])}}"><button>Next</button></a>
+{{pass}}
+</ul>
+</center>
