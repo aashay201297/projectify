@@ -6,12 +6,6 @@ It is written and programmable in Python. LGPLv3 License
 
 Learn more at http://web2py.com
 
-## Google App Engine deployment
-
-    cp examples/app.yaml ./
-    cp handlers/gaehandler.py ./
-    
-Then edit ./app.yaml and replace "yourappname" with yourappname.
 
 ## Important reminder about this GIT repo
 
@@ -31,16 +25,6 @@ If you have a folder gluon/dal you must remove it:
 
 PyDAL uses a separate stable release cycle to the rest of web2py. PyDAL releases will use a date-naming scheme similar to Ubuntu. Issues related to PyDAL should be reported to its separate repository.
 
-
-## Documentation (readthedocs.org)
-
-[![Docs Status](https://readthedocs.org/projects/web2py/badge/?version=latest&style=flat-square)](http://web2py.rtfd.org/)
-
-## Tests
-
-[![Build Status](https://img.shields.io/travis/web2py/web2py/master.svg?style=flat-square&label=Travis-CI)](https://travis-ci.org/web2py/web2py)
-[![MS Build Status](https://img.shields.io/appveyor/ci/web2py/web2py/master.svg?style=flat-square&label=Appveyor-CI)](https://ci.appveyor.com/project/web2py/web2py)
-[![Coverage Status](https://img.shields.io/codecov/c/github/web2py/web2py.svg?style=flat-square)](https://codecov.io/github/web2py/web2py)
 
 
 ## Installation Instructions
@@ -95,6 +79,4 @@ That's it!!!
         logs/                      > log files will go in there
         deposit/                   > a place where web2py stores apps temporarily
 
-## Issues?
 
-Report issues at https://github.com/web2py/web2py/issues
